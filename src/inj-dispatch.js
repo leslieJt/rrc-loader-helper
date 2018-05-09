@@ -1,4 +1,4 @@
-var store = void 0;
+let store;
 
 export default function injectStore(s) {
   store = s;

@@ -3,56 +3,64 @@
  */
 import React from 'react';
 import createReactClass from 'create-react-class';
+
 import { set as setPage } from './current-page';
 
-var STATE_LIST = {
+const STATE_LIST = {
   INIT: 0,
   RESOLVED: 1,
   ERROR: 2,
-  PENDING: 3
+  PENDING: 3,
 };
 
 export default function Loadable(args) {
-  var Loading = args.loading;
-  var loader = args.loader;
-  var Result;
-  var error;
-  var state = STATE_LIST.INIT;
+  let {
+    Loading,
+    loader,
+    page
+  } = args;
+  let Result;
+  let error;
+  let state = STATE_LIST.INIT;
   return createReactClass({
-    getInitialState: function getInitialState() {
+    getInitialState: function() {
+      setPage(page);
       this.active = true;
-      var that = this;
-      setPage(args.page);
+
+      const that = this;
       if (state === STATE_LIST.INIT || state === STATE_LIST.PENDING) {
         state = STATE_LIST.PENDING;
-        loader = (typeof loader === 'function' ? loader() : loader).then(function (view) {
+        if (typeof loader === 'function') {
+          loader = loader();
+        }
+        loader.then(function(view) {
           Result = view.default || view;
           state = STATE_LIST.RESOLVED;
           if (that.active) {
             that.setState({
-              state: state
+              state: state,
             });
           }
           return view;
-        }).catch(function (err) {
+        }).catch(function(err) {
           error = err;
           console.error(err);
           state = STATE_LIST.ERROR;
           if (that.active) {
             that.setState({
-              state: state
+              state: state,
             });
           }
         });
       }
       return {
-        state: state
+        state: state,
       };
     },
-    componentWillUnmount: function componentWillUnmount() {
+    componentWillUnmount: function() {
       this.active = false;
     },
-    render: function render() {
+    render: function() {
       switch (this.state.state) {
         case STATE_LIST.RESOLVED:
           return React.createElement(Result, this.props);
