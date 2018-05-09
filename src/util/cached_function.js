@@ -50,7 +50,7 @@ function onchangeNoMapping(e, page, val, disallow) {
 }
 
 function returnTrue() {
-  return true;
+  return false;
 }
 
 function getOnchangeFunction(page, val, disallow, mapping) {
@@ -65,8 +65,8 @@ function getOnchangeFunction(page, val, disallow, mapping) {
   }
 }
 
-export default function getCachedOnchangeFunction(page, val, mapping, disallow = returnTrue) {
-  if (disallow !== returnTrue) {
+export default function getCachedOnchangeFunction(page, val, mapping, disallow) {
+  if (disallow) {
     return getOnchangeFunction(page, val, disallow, mapping);
   }
   let cacheKey = [page, val].map(x => x.toString()).join(connector);
@@ -74,7 +74,7 @@ export default function getCachedOnchangeFunction(page, val, mapping, disallow =
     cacheKey += connector + JSON.stringify(mapping);
   }
   if (!onChangeCache.has(cacheKey)) {
-    onChangeCache.set(cacheKey, getOnchangeFunction(page, val, disallow, mapping));
+    onChangeCache.set(cacheKey, getOnchangeFunction(page, val, returnTrue, mapping));
   }
   return onChangeCache.get(cacheKey);
 }
