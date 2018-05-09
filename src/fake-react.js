@@ -22,7 +22,7 @@ React.createElement = function createElement(type, config, children) {
         const currentState = store.getState()[page];
         if (currentState) {
           config.value = getMappingVal(currentState, val.split('.'), mapping);
-          config.onChange = getCachedFunction(page, val, disallow, mapping);
+          config.onChange = getCachedFunction(page, val, mapping, disallow);
         }
       }
     }

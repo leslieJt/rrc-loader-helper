@@ -65,7 +65,7 @@ function getOnchangeFunction(page, val, disallow, mapping) {
   }
 }
 
-export default function getCachedOnchangeFunction(page, val, disallow, mapping) {
+export default function getCachedOnchangeFunction(page, val, mapping, disallow) {
   if (disallow) {
     return getOnchangeFunction(page, val, disallow, mapping);
   }
