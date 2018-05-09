@@ -15,7 +15,7 @@ const STATE_LIST = {
 
 export default function Loadable(args) {
   let {
-    Loading,
+    loading: Loading,
     loader,
     page
   } = args;
