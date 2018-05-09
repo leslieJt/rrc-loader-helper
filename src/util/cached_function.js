@@ -23,7 +23,7 @@ function onchangeWithMapping(e, page, val, disallow, mapping) {
     value =  e.target.value;
   }
   value = reverseMappingVal(value, mapping);
-  if (disallow(value)) {
+  if (!disallow(value)) {
     store.dispatch({
       type: action,
       page: page,
@@ -39,7 +39,7 @@ function onchangeNoMapping(e, page, val, disallow) {
   if (e && e.target) {
     value =  e.target.value;
   }
-  if (disallow(value)) {
+  if (!disallow(value)) {
     store.dispatch({
       type: action,
       page: page,
@@ -49,7 +49,7 @@ function onchangeNoMapping(e, page, val, disallow) {
   }
 }
 
-function returnTrue() {
+function returnOk() {
   return false;
 }
 
@@ -65,7 +65,7 @@ function getOnchangeFunction(page, val, disallow, mapping) {
   }
 }
 
-export default function getCachedOnchangeFunction(page, val, mapping, disallow) {
+export default function getCachedOnchangeFunction(page, val, disallow, mapping) {
   if (disallow) {
     return getOnchangeFunction(page, val, disallow, mapping);
   }
@@ -74,7 +74,7 @@ export default function getCachedOnchangeFunction(page, val, mapping, disallow) 
     cacheKey += connector + JSON.stringify(mapping);
   }
   if (!onChangeCache.has(cacheKey)) {
-    onChangeCache.set(cacheKey, getOnchangeFunction(page, val, returnTrue, mapping));
+    onChangeCache.set(cacheKey, getOnchangeFunction(page, val, returnOk, mapping));
   }
   return onChangeCache.get(cacheKey);
 }
