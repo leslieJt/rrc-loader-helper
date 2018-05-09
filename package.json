@@ -6,6 +6,10 @@
   "directories": {
     "lib": "lib"
   },
+  "files": [
+    "lib/**/*.js",
+    "src/**/*.js"
+  ],
   "scripts": {
     "test": "ava",
     "build": "babel src --out-dir lib",
