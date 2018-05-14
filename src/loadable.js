@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import createReactClass from 'create-react-class';
+import { send } from 'sheinq';
 
 import { set as setPage } from './current-page';
 
@@ -22,8 +23,10 @@ export default function Loadable(args) {
   let Result;
   let error;
   let state = STATE_LIST.INIT;
+  let useTime;
   return createReactClass({
     getInitialState: function() {
+      useTime = Date.now();
       setPage(page);
       this.active = true;
 
@@ -59,6 +62,11 @@ export default function Loadable(args) {
     },
     componentWillUnmount: function() {
       this.active = false;
+    },
+    componentDidMount() {
+      send({
+        ctu: Date.now() - useTime, page
+      });
     },
     render: function() {
       switch (this.state.state) {
