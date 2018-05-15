@@ -23,10 +23,9 @@ export default function Loadable(args) {
   let Result;
   let error;
   let state = STATE_LIST.INIT;
-  let useTime;
   return createReactClass({
     getInitialState: function() {
-      useTime = Date.now();
+      this.useTime = Date.now();
       setPage(page);
       this.active = true;
 
@@ -63,9 +62,9 @@ export default function Loadable(args) {
     componentWillUnmount: function() {
       this.active = false;
     },
-    componentDidMount() {
+    componentDidMount: function() {
       send({
-        ctu: Date.now() - useTime, page
+        ctu: Date.now() - this.useTime, page
       });
     },
     render: function() {
