@@ -62,10 +62,23 @@ export default function Loadable(args) {
     componentWillUnmount: function() {
       this.active = false;
     },
+    componentDidUpdate(){
+      if(!this.didSend && this.state.state===1){
+        send({
+          ctu: Date.now() - this.useTime,
+          page,
+        });
+        this.didSend = true;
+      }
+    },
     componentDidMount: function() {
-      send({
-        ctu: Date.now() - this.useTime, page
-      });
+      if(this.state.state===1 && !this.didSend){
+        send({
+          ctu: Date.now() - this.useTime,
+          page,
+        });
+        this.didSend = true;
+      }
     },
     render: function() {
       switch (this.state.state) {
