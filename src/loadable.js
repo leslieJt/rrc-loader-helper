@@ -62,8 +62,8 @@ export default function Loadable(args) {
     componentWillUnmount: function() {
       this.active = false;
     },
-    componentDidUpdate(){
-      if(!this.didSend && this.state.state===1){
+    componentDidUpdate: function(){
+      if(!this.didSend && this.state.state===STATE_LIST.RESOLVED){
         send({
           ctu: Date.now() - this.useTime,
           page,
@@ -72,7 +72,7 @@ export default function Loadable(args) {
       }
     },
     componentDidMount: function() {
-      if(this.state.state===1 && !this.didSend){
+      if(this.state.state===STATE_LIST.RESOLVED && !this.didSend){
         send({
           ctu: Date.now() - this.useTime,
           page,
