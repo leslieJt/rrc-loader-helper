@@ -64,20 +64,24 @@ export default function Loadable(args) {
     },
     componentDidUpdate: function(){
       if(!this.didSend && this.state.state===STATE_LIST.RESOLVED){
-        send({
-          ctu: Date.now() - this.useTime,
-          page,
-        });
         this.didSend = true;
+        setTimeout(() => {
+          send({
+            ctu: Date.now() - this.useTime - 4,
+            page,
+          });
+        }, 4);
       }
     },
     componentDidMount: function() {
       if(this.state.state===STATE_LIST.RESOLVED && !this.didSend){
-        send({
-          ctu: Date.now() - this.useTime,
-          page,
-        });
         this.didSend = true;
+        setTimeout(() => {
+          send({
+            ctu: Date.now() - this.useTime - 4,
+            page,
+          });
+        }, 4);
       }
     },
     render: function() {
