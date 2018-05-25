@@ -7,6 +7,9 @@ import { send } from 'sheinq';
 
 import { set as setPage } from './current-page';
 
+const historyList = [];
+let firstScreen = true;
+
 const STATE_LIST = {
   INIT: 0,
   RESOLVED: 1,
@@ -62,26 +65,40 @@ export default function Loadable(args) {
     componentWillUnmount: function() {
       this.active = false;
     },
-    componentDidUpdate: function(){
-      if(!this.didSend && this.state.state===STATE_LIST.RESOLVED){
+    componentDidUpdate: function() {
+      if (!this.didSend && this.state.state === STATE_LIST.RESOLVED) {
         this.didSend = true;
         setTimeout(() => {
           send({
             ctu: Date.now() - this.useTime - 4,
             page,
+            refer: historyList.length>1 ? historyList[historyList.length - 2] : '',
+            firstScreen
           });
+          if(firstScreen) firstScreen = !firstScreen;
         }, 4);
       }
     },
     componentDidMount: function() {
-      if(this.state.state===STATE_LIST.RESOLVED && !this.didSend){
+      if (this.state.state === STATE_LIST.RESOLVED && !this.didSend) {
         this.didSend = true;
+        const preHis = historyList.pop();
         setTimeout(() => {
           send({
             ctu: Date.now() - this.useTime - 4,
             page,
+            refer: preHis || '',
+            firstScreen
           });
+          if(firstScreen) firstScreen = !firstScreen;
         }, 4);
+      }
+      const l = historyList.length;
+      if(!l){
+        historyList.push(page);
+      }else if(historyList[l - 1] != page){
+        if (l >= 10) historyList.shift();
+        historyList.push(page);
       }
     },
     render: function() {
