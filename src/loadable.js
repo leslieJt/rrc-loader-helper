@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import createReactClass from 'create-react-class';
-import { send } from 'sheinq';
+import { send, sendEvent, setEventStartTime } from 'sheinq';
 
 import { set as setPage } from './current-page';
 
@@ -29,6 +29,7 @@ export default function Loadable(args) {
   return createReactClass({
     getInitialState: function() {
       this.useTime = Date.now();
+      setEventStartTime(this.useTime);
       setPage(page);
       this.active = true;
 
@@ -64,6 +65,12 @@ export default function Loadable(args) {
     },
     componentWillUnmount: function() {
       this.active = false;
+      sendEvent({
+        eventCategory: 'view',
+        eventAction: 'leave',
+        eventLabel: 'stayTime',
+        eventValue: Date.now() - this.useTime
+      });
     },
     componentDidUpdate: function() {
       if (!this.didSend && this.state.state === STATE_LIST.RESOLVED) {
