@@ -28,6 +28,10 @@ export default function decorateFn(fn, page) {
             fn[action.type](draft , action);
           }catch(e){
             sendError(e);
+            if(process.env.NODE_ENV!=='production'){
+              throw e;
+            }
+            return state;
           }
         })
       }
@@ -50,6 +54,10 @@ export default function decorateFn(fn, page) {
       return fn(state, action);
     }catch(e){
       sendError(e);
+      if(process.env.NODE_ENV!=='production'){
+        throw e;
+      }
+      return state;
     }
   }
 }
