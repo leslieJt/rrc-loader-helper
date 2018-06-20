@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import createReactClass from 'create-react-class';
-import { send, sendEvent, setEventStartTime } from 'sheinq';
+import { sendPv, sendEvent, setEventStartTime } from 'sheinq';
 
 import { set as setPage } from './current-page';
 
@@ -76,7 +76,7 @@ export default function Loadable(args) {
       if (!this.didSend && this.state.state === STATE_LIST.RESOLVED) {
         this.didSend = true;
         setTimeout(() => {
-          send({
+          sendPv({
             ctu: Date.now() - this.useTime - 4,
             page,
             refer: historyList.length>1 ? historyList[historyList.length - 2] : '',
@@ -91,7 +91,7 @@ export default function Loadable(args) {
         this.didSend = true;
         const preHis = historyList.pop();
         setTimeout(() => {
-          send({
+          sendPv({
             ctu: Date.now() - this.useTime - 4,
             page,
             refer: preHis || '',
