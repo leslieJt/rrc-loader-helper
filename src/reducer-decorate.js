@@ -22,9 +22,7 @@ export default function decorateFn(fn, page) {
      */
     return function (state = fn.defaultState, action) {
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
-        return produce(state, draft => {
-          fn[action.type](draft , action);
-        })
+        return produce(state, draft => fn[action.type](draft , action));
       }
       if (action.type === theAction) {
         if (action.page === page) {
