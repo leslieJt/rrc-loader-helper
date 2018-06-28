@@ -25,7 +25,7 @@ export default function decorateFn(fn, page) {
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
         return produce(state, draft => {
           try{
-            fn[action.type](draft , action);
+            return fn[action.type](draft , action);
           }catch(e){
             sendError(e);
             if(process.env.NODE_ENV!=='production'){
