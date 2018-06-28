@@ -1,4 +1,5 @@
 import produce from 'immer';
+import { sendError } from 'sheinq';
 import theAction from './actions';
 import {
   setValKeyPath,
@@ -23,7 +24,15 @@ export default function decorateFn(fn, page) {
     return function (state = fn.defaultState, action) {
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
         return produce(state, draft => {
-          fn[action.type](draft , action);
+          try{
+            return fn[action.type](draft , action);
+          }catch(e){
+            sendError(e);
+            if(process.env.NODE_ENV!=='production'){
+              throw e;
+            }
+            return state;
+          }
         })
       }
       if (action.type === theAction) {
@@ -41,6 +50,14 @@ export default function decorateFn(fn, page) {
       }
       return state;
     }
-    return fn(state, action);
+    try{
+      return fn(state, action);
+    }catch(e){
+      sendError(e);
+      if(process.env.NODE_ENV!=='production'){
+        throw e;
+      }
+      return state;
+    }
   }
 }
