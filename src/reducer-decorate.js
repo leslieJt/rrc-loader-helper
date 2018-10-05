@@ -27,10 +27,11 @@ export default function decorateFn(fn, page) {
           try{
             return fn[action.type](draft , action);
           }catch(e){
-            sendError(e);
             if(process.env.NODE_ENV!=='production'){
               throw e;
             }
+            console.error('It"s called by rrc-loader-helper:' + e);
+            sendError(e);
             return state;
           }
         })
@@ -53,10 +54,11 @@ export default function decorateFn(fn, page) {
     try{
       return fn(state, action);
     }catch(e){
-      sendError(e);
       if(process.env.NODE_ENV!=='production'){
         throw e;
       }
+      console.error('It"s called by rrc-loader-helper:' + e);
+      sendError(e);
       return state;
     }
   }
