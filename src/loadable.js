@@ -27,7 +27,7 @@ export default function Loadable(args) {
   let error;
   let state = STATE_LIST.INIT;
   return createReactClass({
-    getInitialState: function() {
+    getInitialState: function () {
       this.useTime = Date.now();
       setLeaveStartTime(this.useTime);
       setPage(page);
@@ -39,7 +39,7 @@ export default function Loadable(args) {
         if (typeof loader === 'function') {
           loader = loader();
         }
-        loader.then(function(view) {
+        loader.then(function (view) {
           Result = view.default || view;
           state = STATE_LIST.RESOLVED;
           if (that.active) {
@@ -48,7 +48,7 @@ export default function Loadable(args) {
             });
           }
           return view;
-        }).catch(function(err) {
+        }).catch(function (err) {
           error = err;
           console.error(err);
           state = STATE_LIST.ERROR;
@@ -63,7 +63,8 @@ export default function Loadable(args) {
         state: state,
       };
     },
-    componentWillUnmount: function() {
+    // @TODO unmount重置state
+    componentWillUnmount: function () {
       this.active = false;
       sendLeave({
         eventCategory: 'view',
@@ -72,21 +73,21 @@ export default function Loadable(args) {
         eventValue: Date.now() - this.useTime
       });
     },
-    componentDidUpdate: function() {
+    componentDidUpdate: function () {
       if (!this.didSend && this.state.state === STATE_LIST.RESOLVED) {
         this.didSend = true;
         setTimeout(() => {
           sendPv({
             ctu: Date.now() - this.useTime - 4,
             page,
-            refer: historyList.length>1 ? historyList[historyList.length - 2] : '',
+            refer: historyList.length > 1 ? historyList[historyList.length - 2] : '',
             firstScreen
           });
-          if(firstScreen) firstScreen = !firstScreen;
+          if (firstScreen) firstScreen = !firstScreen;
         }, 4);
       }
     },
-    componentDidMount: function() {
+    componentDidMount: function () {
       if (this.state.state === STATE_LIST.RESOLVED && !this.didSend) {
         this.didSend = true;
         const preHis = historyList.pop();
@@ -97,18 +98,19 @@ export default function Loadable(args) {
             refer: preHis || '',
             firstScreen
           });
-          if(firstScreen) firstScreen = !firstScreen;
+          if (firstScreen) firstScreen = !firstScreen;
         }, 4);
       }
+      // only reserve 10 pages in history
       const l = historyList.length;
-      if(!l){
+      if (!l) {
         historyList.push(page);
-      }else if(historyList[l - 1] != page){
+      } else if (historyList[l - 1] != page) {
         if (l >= 10) historyList.shift();
         historyList.push(page);
       }
     },
-    render: function() {
+    render: function () {
       switch (this.state.state) {
         case STATE_LIST.RESOLVED:
           return React.createElement(Result, this.props);

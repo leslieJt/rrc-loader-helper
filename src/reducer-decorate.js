@@ -1,9 +1,26 @@
 import produce from 'immer';
 import { sendError } from 'sheinq';
-import theAction from './actions';
+import theAction, {
+  toggleLoading, loadDataDone,
+} from './actions';
 import {
   setValKeyPath,
 } from './util/obj_key_path_ops';
+
+function builtinReducer(state, action, page) {
+  if (action.page !== page) return null;
+  switch (action.type) {
+    case theAction:
+      return setValKeyPath(state, action.key.split('.'), action.value);
+    case toggleLoading:
+      return action.loadings.reduce((acc, cur) => setValKeyPath(acc, cur.split('.'), true), state);
+    case loadDataDone:
+      return action.loadings.reduce((acc, cur) => setValKeyPath(acc, cur.split('.'), false),
+        Object.assign({}, state, action.data));
+    default:
+      return null;
+  }
+}
 
 export default function decorateFn(fn, page) {
   if (typeof fn !== 'function' && typeof fn === 'object') {
@@ -24,10 +41,10 @@ export default function decorateFn(fn, page) {
     return function (state = fn.defaultState, action) {
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
         return produce(state, draft => {
-          try{
-            return fn[action.type](draft , action);
-          }catch(e){
-            if(process.env.NODE_ENV!=='production'){
+          try {
+            return fn[action.type](draft, action);
+          } catch (e) {
+            if (process.env.NODE_ENV !== 'production') {
               throw e;
             }
             console.error('It"s called by rrc-loader-helper:' + e);
@@ -36,25 +53,18 @@ export default function decorateFn(fn, page) {
           }
         })
       }
-      if (action.type === theAction) {
-        if (action.page === page) {
-          return setValKeyPath(state, action.key.split('.'), action.value);
-        }
-      }
+      const builtinState = builtinReducer(state, action, page);
+      if (builtinState) return builtinState;
       return state;
     }
   }
   return function (state, action) {
-    if (action.type === theAction) {
-      if (action.page === page) {
-        return setValKeyPath(state, action.key.split('.'), action.value);
-      }
-      return state;
-    }
-    try{
+    const builtinState = builtinReducer(state, action, page);
+    if (builtinState) return builtinState;
+    try {
       return fn(state, action);
-    }catch(e){
-      if(process.env.NODE_ENV!=='production'){
+    } catch (e) {
+      if (process.env.NODE_ENV !== 'production') {
         throw e;
       }
       console.error('It"s called by rrc-loader-helper:' + e);
