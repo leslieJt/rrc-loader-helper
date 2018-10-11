@@ -36,7 +36,8 @@
     "babel-core": "^6.26.3",
     "babel-plugin-transform-export-extensions": "^6.22.0",
     "babel-preset-env": "^1.6.1",
-    "babel-register": "^6.26.0"
+    "babel-register": "^6.26.0",
+    "redux": "^4.0.0"
   },
   "peerDependencies": {
     "sheinq": "^1.1.4"
