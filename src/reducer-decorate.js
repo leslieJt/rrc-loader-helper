@@ -6,6 +6,7 @@ import theAction, {
 import {
   setValKeyPath,
 } from './util/obj_key_path_ops';
+import invariant from "./util/invariant";
 
 function builtinReducer(state, action, page) {
   if (action.page !== page) return null;
@@ -19,6 +20,23 @@ function builtinReducer(state, action, page) {
         Object.assign({}, state, action.data));
     default:
       return null;
+  }
+}
+
+export const registeredReducers = [];
+
+export function registerReducer(reducer) {
+  const isValid = invariant(typeof reducer === 'function', 'handler must be a function!');
+
+  if (!isValid) return;
+
+  registeredReducers.push(reducer);
+
+  // revoke
+  return () => {
+    const index = registeredReducers.findIndex(reducer);
+    if (index === -1) return;
+    registeredReducers.splice(index, 1);
   }
 }
 
