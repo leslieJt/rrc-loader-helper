@@ -6,6 +6,9 @@ import createReactClass from 'create-react-class';
 import { sendPv, sendLeave, setLeaveStartTime } from 'sheinq';
 
 import { set as setPage } from './current-page';
+import { getStore } from './inj-dispatch';
+import { updatePage } from "./actions";
+import { registerReducer, pageUpdatedReducer } from './reducers';
 
 const historyList = [];
 let firstScreen = true;
@@ -16,6 +19,8 @@ const STATE_LIST = {
   ERROR: 2,
   PENDING: 3,
 };
+
+registerReducer(pageUpdatedReducer);
 
 export default function Loadable(args) {
   let {
@@ -40,6 +45,11 @@ export default function Loadable(args) {
           loader = loader();
         }
         loader.then(function (view) {
+          const store = getStore();
+          const { location, match } = that.props;
+          // Component loaded, then dispatch.
+          store.dispatch({ type: updatePage, payload: { page, location, match } });
+
           Result = view.default || view;
           state = STATE_LIST.RESOLVED;
           if (that.active) {

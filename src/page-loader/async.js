@@ -2,7 +2,9 @@ import reduceReducers from 'reduce-reducers';
 import {
   updateSaga
 } from '../actions';
-import enhanceReducer, { registeredReducers } from '../reducer-decorate';
+import enhanceReducer from '../reducer-decorate';
+import { registeredReducers } from '../reducers';
+
 import { getStore } from '../inj-dispatch';
 
 import { combineReducers } from 'redux';
