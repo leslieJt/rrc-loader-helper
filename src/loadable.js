@@ -26,7 +26,8 @@ export default function Loadable(args) {
   let {
     loading: Loading,
     loader,
-    page
+    page,
+    retain,
   } = args;
   let Result;
   let error;
@@ -48,7 +49,7 @@ export default function Loadable(args) {
           const store = getStore();
           const { location, match } = that.props;
           // Component loaded, then dispatch.
-          store.dispatch({ type: updatePage, payload: { page, location, match } });
+          store.dispatch({ type: updatePage, payload: { page, location, match, retain } });
 
           Result = view.default || view;
           state = STATE_LIST.RESOLVED;
