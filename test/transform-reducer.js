@@ -25,7 +25,6 @@ test('#transform reducer', t => {
       mapping: Object.assign(Object.create(raw), {
         [`${page}/defaultState`]: raw.defaultState,
         [`${page}/hello`]: raw.hello,
-        [`${page}/zz`]: raw.zz,
       }),
     }
   };

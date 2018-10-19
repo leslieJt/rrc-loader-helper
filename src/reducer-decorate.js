@@ -37,6 +37,10 @@ function builtinReducer(state, action, page) {
 
 export default function decorateFn(fn, page) {
   if (typeof fn !== 'function' && typeof fn === 'object') {
+    if (Object.hasOwnProperty.call(fn, '.__inner__')) {
+      fn = fn['.__inner__'].mapping;
+    }
+
     if (!(fn.defaultState)) {
       if (process.env.NODE_ENV !== 'production') {
         const err = new Error('required property defaultState in reducer \n' +
@@ -47,14 +51,13 @@ export default function decorateFn(fn, page) {
         fn.defaultState = {};
       }
     }
-    if (Object.hasOwnProperty.call(fn, '.__inner__')) {
-      fn = fn.mapping;
-    }
     /**
      * reducer 为对象的时候包装为immer处理方式
      * 对象内 defaultState 为必须属性
      */
     return function (state = fn.defaultState, action) {
+      const builtinState = builtinReducer(state, action, page);
+      if (builtinState) return builtinState;
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
         return produce(state, draft => {
           try {
@@ -69,8 +72,6 @@ export default function decorateFn(fn, page) {
           }
         })
       }
-      const builtinState = builtinReducer(state, action, page);
-      if (builtinState) return builtinState;
       return state;
     }
   }

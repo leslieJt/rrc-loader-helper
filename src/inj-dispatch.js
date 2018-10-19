@@ -9,7 +9,7 @@ export default function injectStore(s) {
   }
 }
 
-export function getStore(cb) {
+export function getStore(cb = () => {}) {
   if (!store) {
     pendings.push(cb);
     return false;

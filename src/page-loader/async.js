@@ -13,7 +13,9 @@ import { combineReducers } from 'redux';
 function asyncPageCallback(module, page, reducers) {
   const { view, reducer, saga } = module;
   const store = getStore();
-  store.dispatch({ type: updateSaga, saga: saga });
+  if (saga) {
+    store.dispatch({ type: updateSaga, saga: saga });
+  }
   if (!reducers[page]) {
     reducers[page] = enhanceReducer(reducer, page);
     store.replaceReducer(reduceReducers(...registeredReducers, combineReducers(reducers)));

@@ -1,5 +1,16 @@
 const assert = require('assert');
 
+function isGenerator(obj) {
+  return 'function' == typeof obj.next && 'function' == typeof obj.throw;
+}
+
+function isGeneratorFunction(obj) {
+  var constructor = obj.constructor;
+  if (!constructor) return false;
+  if ('GeneratorFunction' === constructor.name || 'GeneratorFunction' === constructor.displayName) return true;
+  return isGenerator(constructor.prototype);
+}
+
 export default function (obj, page) {
   assert(typeof obj === 'object' && !Array.isArray(obj),
     'Your reducer must be an object, if you wanna use MobX style!');
@@ -10,7 +21,9 @@ export default function (obj, page) {
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
     result[key] = `${page}/${key}`;
-    mapping[`${page}/${key}`] = originalObject[key];
+    if (!isGeneratorFunction(originalObject[key])) {
+      mapping[`${page}/${key}`] = originalObject[key];
+    }
   }
   result['.__inner__'] = {
     originalObject,

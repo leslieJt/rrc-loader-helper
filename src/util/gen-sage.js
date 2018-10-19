@@ -45,7 +45,7 @@ export default function genSagas(obj, page, ctx) {
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const fn = result[key];
-        takeLatest(key, function* (action) {
+        yield takeLatest(key, function* (action) {
           yield* fn(action, ctx, newInputFactory(fn));
         });
       }

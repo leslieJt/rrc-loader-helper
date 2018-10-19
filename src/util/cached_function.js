@@ -107,6 +107,7 @@ export function getLoadDataOnClick(page, {
           type: loadDataDone,
           page: page,
           data,
+          loadings: loadings || [],
         });
       } else {
         store.dispatch({
@@ -115,6 +116,7 @@ export function getLoadDataOnClick(page, {
           data: {
             data,
           },
+          loadings: loadings || [],
         });
       }
     });
