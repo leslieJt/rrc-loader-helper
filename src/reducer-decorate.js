@@ -1,7 +1,7 @@
 import produce from 'immer';
 import { sendError } from 'sheinq';
 import theAction, {
-  toggleLoading, loadDataDone,
+  toggleLoading, loadDataDone, editInSaga,
 } from './actions';
 import {
   setValKeyPath,
@@ -17,6 +17,19 @@ function builtinReducer(state, action, page) {
     case loadDataDone:
       return action.loadings.reduce((acc, cur) => setValKeyPath(acc, cur.split('.'), false),
         Object.assign({}, state, action.data));
+    case editInSaga:
+      return produce(state, draft => {
+        try {
+          return action.fn(draft, action);
+        } catch (e) {
+          if (process.env.NODE_ENV !== 'production') {
+            throw e;
+          }
+          console.error('It"s called by rrc-loader-helper:' + e);
+          sendError(e);
+          return state;
+        }
+      });
     default:
       return null;
   }
@@ -33,6 +46,9 @@ export default function decorateFn(fn, page) {
       } else {
         fn.defaultState = {};
       }
+    }
+    if (Object.hasOwnProperty.call(fn, '.__inner__')) {
+      fn = fn.mapping;
     }
     /**
      * reducer 为对象的时候包装为immer处理方式

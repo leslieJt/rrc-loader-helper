@@ -29,8 +29,7 @@
   "dependencies": {
     "create-react-class": "^15.6.2",
     "immer": "^1.7.2",
-    "reduce-reducers": "^0.4.3",
-    "redux": "^4.0.0"
+    "reduce-reducers": "^0.4.3"
   },
   "devDependencies": {
     "ava": "^0.25.0",
@@ -38,10 +37,14 @@
     "babel-core": "^6.26.3",
     "babel-plugin-transform-export-extensions": "^6.22.0",
     "babel-preset-env": "^1.6.1",
-    "babel-register": "^6.26.0"
+    "babel-register": "^6.26.0",
+    "redux-saga": "^0.16.2",
+    "redux": "^4.0.0"
   },
   "peerDependencies": {
-    "sheinq": "^1.1.19"
+    "sheinq": "^1.1.19",
+    "redux": "4",
+    "redux-saga": "1"
   },
   "ava": {
     "files": [
