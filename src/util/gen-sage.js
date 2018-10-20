@@ -21,12 +21,15 @@ const cacheMap = new Map();
 export default function genSagas(obj, page, ctx) {
   function newInputFactory(fn) {
     return function newPut(action) {
-      return put({
-        type: editInSaga,
-        page,
-        fromMethod: fn.name,
-        fn: action,
-      });
+      if (!action.type) {
+        return put({
+          type: editInSaga,
+          page,
+          fromMethod: fn.name,
+          fn: action,
+        });
+      }
+      return put(action);
     };
   }
 
