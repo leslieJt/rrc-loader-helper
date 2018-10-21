@@ -4,6 +4,10 @@
 import { takeLatest, put } from 'redux-saga/effects';
 
 import { editInSaga } from '../actions';
+import {
+  pushRunningStack,
+  popRunningStack,
+} from '../mark-status';
 
 function isGenerator(obj) {
   return 'function' == typeof obj.next && 'function' == typeof obj.throw;
@@ -20,13 +24,14 @@ const cacheMap = new Map();
 
 export default function genSagas(obj, page, ctx) {
   function newInputFactory(fn) {
-    return function newPut(action) {
+    return function newPut(action, description = '') {
       if (!action.type) {
         return put({
           type: editInSaga,
           page,
           fromMethod: fn.name,
           fn: action,
+          description,
         });
       }
       return put(action);
@@ -49,7 +54,38 @@ export default function genSagas(obj, page, ctx) {
         const key = keys[i];
         const fn = result[key];
         yield takeLatest(key, function* (action) {
-          yield* fn(action, ctx, newInputFactory(fn));
+          const currentFrame = pushRunningStack();
+          const newPutFn = newInputFactory(fn);
+          const markings = [];
+          try {
+            for (let currentObj of fn(action, ctx, newPutFn)) {
+              const added = [];
+              while (currentFrame.length) {
+                const statusVar = currentFrame.pop();
+                markings.push(statusVar);
+                added.push(statusVar);
+              }
+              if (added.length) {
+                yield newPutFn(state => {
+                  added.forEach(mark => state[mark] = 0);
+                }, 'change some flags to loading');
+              }
+              popRunningStack();
+              yield currentObj;
+              pushRunningStack(currentFrame);
+            }
+          } catch (e) {
+            yield put(state => {
+              markings.forEach(mark => state[mark] = 2);
+            }, 'change some flags to error');
+            throw e;
+          } finally {
+            yield put(state => {
+              markings.forEach(mark => state[mark] = 1);
+            }, 'change some flags to done');
+            popRunningStack();
+          }
+
         });
       }
     });
