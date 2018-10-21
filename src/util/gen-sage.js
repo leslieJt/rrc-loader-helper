@@ -58,7 +58,11 @@ export default function genSagas(obj, page, ctx) {
           const newPutFn = newInputFactory(fn);
           const markings = [];
           try {
-            for (let currentObj of fn(action, ctx, newPutFn)) {
+            const iterator = fn(action, ctx, newPutFn);
+            let val = null;
+            while (true) {
+              const { done, value } = iterator.next(val);
+              if (done) break;
               const added = [];
               while (currentFrame.length) {
                 const statusVar = currentFrame.pop();
@@ -71,7 +75,7 @@ export default function genSagas(obj, page, ctx) {
                 }, 'change some flags to loading');
               }
               popRunningStack();
-              yield currentObj;
+              val = yield value;
               pushRunningStack(currentFrame);
             }
           } catch (e) {
