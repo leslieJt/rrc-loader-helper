@@ -19,10 +19,11 @@ export default function (obj, page) {
   const result = {};
   const mapping = Object.create(originalObject);
   for (let i = 0; i < keys.length; i++) {
-    const key = keys[i].replace(/^\$/, '');
+    const key = keys[i];
     result[key] = `${page}/${key}`;
     if (!isGeneratorFunction(originalObject[key])) {
       mapping[`${page}/${key}`] = originalObject[key];
+      mapping[`${page}/${key.replace(/^\$/, '')}`] = originalObject[key];
     }
   }
   result['.__inner__'] = {
