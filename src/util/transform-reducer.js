@@ -23,7 +23,6 @@ export default function (obj, page) {
   const mapping = Object.create(originalObject);
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
-    result[key] = `${page}/${key}`;
     result[key] = function dispatchProvidedByRRCLoaders(arg) {
       let dispatch;
       // @TODO magic
@@ -44,6 +43,7 @@ export default function (obj, page) {
         type: `${page}/${key}`,
       }));
     };
+    result[key].type = `${page}/${key}`;
     if (!isGeneratorFunction(originalObject[key])) {
       mapping[`${page}/${key}`] = originalObject[key];
       mapping[`${page}/${key.replace(/^\$/, '')}`] = originalObject[key];

@@ -1,3 +1,6 @@
+// for global unique
+import './util/gen-sage';
+
 let store;
 
 const pendings = [];
