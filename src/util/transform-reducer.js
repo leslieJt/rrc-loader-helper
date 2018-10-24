@@ -5,21 +5,21 @@ function isGenerator(obj) {
 }
 
 function isGeneratorFunction(obj) {
-  var constructor = obj.constructor;
+  const constructor = obj.constructor;
   if (!constructor) return false;
   if ('GeneratorFunction' === constructor.name || 'GeneratorFunction' === constructor.displayName) return true;
   return isGenerator(constructor.prototype);
 }
 
 export default function (obj, page) {
-  if(typeof obj === 'object' && !Array.isArray(obj) ){
+  if(!(typeof obj === 'object' && !Array.isArray(obj))){
    throw new Error('Your reducer must be an object, if you wanna use MobX style!');
   }
   const originalObject = obj;
   const keys = Object.keys(originalObject);
   const result = {};
   const mapping = Object.create(originalObject);
-  for (let i = 0; i < keys.length; i++) {
+  for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     result[key] = `${page}/${key}`;
     result[key] = function dispatchProvidedByRRCLoaders(arg) {

@@ -11,15 +11,15 @@ test('#transform reducer', t => {
     hello: (state, action) => {
       state.value = action.value;
     },
-    *zz(action, ctx, put) {
+    * zz(action, ctx, put) {
       yield 1;
     },
   };
-
+  const result = transformReducer(raw, page);
   const expected = {
-    defaultState: `${page}/defaultState`,
-    hello: `${page}/hello`,
-    zz: `${page}/zz`,
+    defaultState: result.defaultState,
+    hello: result.hello,
+    zz: result.zz,
     ['.__inner__']: {
       originalObject: raw,
       mapping: Object.assign(Object.create(raw), {
@@ -29,5 +29,5 @@ test('#transform reducer', t => {
     }
   };
 
-  t.deepEqual(transformReducer(raw, page), expected);
+  t.deepEqual(result, expected);
 });
