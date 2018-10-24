@@ -1,3 +1,5 @@
+import { put } from 'redux-saga/effects';
+
 import { getStore } from '../inj-dispatch';
 
 function isGenerator(obj) {
@@ -23,14 +25,22 @@ export default function (obj, page) {
     const key = keys[i];
     result[key] = `${page}/${key}`;
     result[key] = function dispatchProvidedByRRCLoaders(arg) {
-      const store = getStore();
-      if (!store) {
-        throw new Error('currently no store got, it\'s a bug caused by rrc-loader-helper.');
+      let dispatch;
+      // @TODO magic
+      if (!this.inSaga) {
+        const store = getStore();
+        if (!store) {
+          throw new Error('currently no store got, it\'s a bug caused by rrc-loader-helper.');
+        }
+        dispatch = store.dispatch;
+      } else {
+        dispatch = put;
       }
+
       if (arg && typeof arg !== 'object') {
         throw new Error('In the mobx style, you must pass arguments to method in object form.');
       }
-      return store.dispatch(Object.assign({}, arg, {
+      return dispatch(Object.assign({}, arg, {
         type: `${page}/${key}`,
       }));
     };

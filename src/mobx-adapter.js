@@ -6,7 +6,14 @@ import { updateSaga } from './actions';
 
 export default function adaptToMobx(obj, page) {
   const ctx = transformReducer(obj, page);
-  const saga = genSaga(obj, page, ctx);
+  // @TODO ctx is very magic!!! use inSaga to switch dispatch function
+  const saga = genSaga(obj, page, Object.create(ctx, {
+    inSaga: {
+      value: true,
+      configurable: false,
+      writable: false,
+    },
+  }));
   // @TODO can i use store?
   if (saga) {
     getStore(function (store) {
