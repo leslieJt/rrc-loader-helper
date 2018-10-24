@@ -30,9 +30,9 @@ export default function (obj, page) {
       if (arg && typeof arg !== 'object') {
         throw new Error('In the mobx style, you must pass arguments to method in object form.');
       }
-      return store.dispatch(Object.assign({
+      return store.dispatch({}, arg, Object.assign({
         type: `${page}/${key}`,
-      }, arg));
+      }));
     };
     if (!isGeneratorFunction(originalObject[key])) {
       mapping[`${page}/${key}`] = originalObject[key];
