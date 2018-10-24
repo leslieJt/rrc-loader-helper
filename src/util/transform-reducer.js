@@ -27,7 +27,7 @@ export default function (obj, page) {
       if (!store) {
         throw new Error('currently no store got, it\'s a bug caused by rrc-loader-helper.');
       }
-      if (typeof arg !== 'object') {
+      if (arg && typeof arg !== 'object') {
         throw new Error('In the mobx style, you must pass arguments to method in object form.');
       }
       return store.dispatch(Object.assign({
