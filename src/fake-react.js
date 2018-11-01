@@ -2,27 +2,28 @@ import React from 'react';
 import {
   getMappingVal,
   getCachedFunction,
-  getLoadDataOnClick,
 } from './util';
 import {
   get as getCurrentPage,
 } from './current-page'
 import { getStore } from './inj-dispatch';
 
-const raw = React.createElement;
+const raw = React.createElement.bind(React);
+
+// builtin props
+const builtins = {
+  bind: 'data-bind',
+  mapping: 'data-mapping',
+  disallow: 'data-disallow'
+};
 
 // when pass into data-bind and onChange / disallow, performance may deteriorate
-React.createElement = function createElement(type, config, children) {
+React.createElement = function createElement(type, config, ...children) {
   if (config) {
-    const val = config['data-bind'];
-    const mapping = config['data-mapping'];
-    const disallow = config['data-disallow'];
-    const load = config['data-load'];
-    // changing oncLick should not influence the performance
-    if (load) {
-      const page = getCurrentPage();
-      config.onClick = getLoadDataOnClick(page, load);
-    }
+    const val = config[builtins.bind];
+    const mapping = config[builtins.mapping];
+    const disallow = config[builtins.disallow];
+
     if (val) {
       const store = getStore();
       if (store) {
@@ -33,7 +34,11 @@ React.createElement = function createElement(type, config, children) {
           config.onChange = getCachedFunction(page, val, mapping, disallow, config.onChange);
         }
       }
+
+      // clear builtin props
+      Object.values(builtins).forEach(prop => delete config[prop]);
     }
   }
-  return raw.apply(React, arguments);
+
+  return raw(type, config, ...children);
 };

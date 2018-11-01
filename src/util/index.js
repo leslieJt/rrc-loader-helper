@@ -11,4 +11,4 @@ export function getMappingVal(obj, keyPath, mapping) {
   return rawRes;
 }
 
-export getCachedFunction, { getLoadDataOnClick } from './cached_function';
+export getCachedFunction  from './cached_function';
