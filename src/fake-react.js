@@ -11,18 +11,14 @@ import { getStore } from './inj-dispatch';
 const raw = React.createElement.bind(React);
 
 // builtin props
-const builtins = {
-  bind: 'data-bind',
-  mapping: 'data-mapping',
-  disallow: 'data-disallow'
-};
+const builtins = ['data-bind', 'data-mapping', 'data-disallow'];
 
 // when pass into data-bind and onChange / disallow, performance may deteriorate
 React.createElement = function createElement(type, config, ...children) {
   if (config) {
-    const val = config[builtins.bind];
-    const mapping = config[builtins.mapping];
-    const disallow = config[builtins.disallow];
+    const val = config[builtins[0]];
+    const mapping = config[builtins[1]];
+    const disallow = config[builtins[2]];
 
     if (val) {
       const store = getStore();
@@ -36,7 +32,7 @@ React.createElement = function createElement(type, config, ...children) {
       }
 
       // clear builtin props
-      Object.values(builtins).forEach(prop => delete config[prop]);
+      builtins.forEach(prop => delete config[prop]);
     }
   }
 
