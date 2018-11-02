@@ -1,8 +1,6 @@
 import produce from 'immer';
 import { sendError } from 'sheinq';
-import theAction, {
-  toggleLoading, loadDataDone, editInSaga,
-} from './actions';
+import theAction, { editInSaga } from './actions';
 import {
   setValKeyPath,
 } from './util/obj_key_path_ops';
@@ -12,11 +10,6 @@ function builtinReducer(state, action, page) {
   switch (action.type) {
     case theAction:
       return setValKeyPath(state, action.key.split('.'), action.value);
-    case toggleLoading:
-      return action.loadings.reduce((acc, cur) => setValKeyPath(acc, cur.split('.'), true), state);
-    case loadDataDone:
-      return action.loadings.reduce((acc, cur) => setValKeyPath(acc, cur.split('.'), false),
-        Object.assign({}, state, action.data));
     case editInSaga:
       return produce(state, draft => {
         try {

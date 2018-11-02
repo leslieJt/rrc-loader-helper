@@ -1,7 +1,4 @@
-import action, {
-  loadDataDone,
-  toggleLoading,
-} from '../actions';
+import action from '../actions';
 import {
   getStore
 } from '../inj-dispatch';
@@ -19,14 +16,18 @@ setCallback(function () {
   onChangeCache.clear();
 });
 
-function onchangeWithMapping(e, page, val, disallow, mapping, originOnchange) {
+const ok = () => false;
+const noop = () => {};
+
+function onchange(caller, e, page, val, mapping) {
   const store = getStore();
   let value = e;
   if (e && e.target) {
     value = e.target.value;
   }
-  value = reverseMappingVal(value, mapping);
-  if (!disallow(value)) {
+  if (mapping) value = reverseMappingVal(value, mapping);
+
+  if (!caller.fns.disallow(value)) {
     store.dispatch({
       type: action,
       page: page,
@@ -34,91 +35,31 @@ function onchangeWithMapping(e, page, val, disallow, mapping, originOnchange) {
       value: value
     });
   }
-  if (originOnchange) {
-    originOnchange(e);
-  }
+
+  return caller.fns.originOnchange(e);
 }
 
-function onchangeNoMapping(e, page, val, disallow, originOnchange) {
-  const store = getStore();
-  let value = e;
-  if (e && e.target) {
-    value = e.target.value;
-  }
-  if (!disallow(value)) {
-    store.dispatch({
-      type: action,
-      page: page,
-      key: val,
-      value: value
-    });
-  }
-  if (originOnchange) {
-    originOnchange(e);
-  }
-}
-
-function returnOk() {
-  return false;
-}
-
-function getOnchangeFunction(page, val, disallow, mapping, originOnchange) {
+function generateCacheKey(page, val, mapping) {
+  let key = [page, val].map(x => x.toString()).join(connector);
   if (mapping) {
-    return function onChange(e) {
-      onchangeWithMapping(e, page, val, disallow, mapping, originOnchange);
-    }
+    key += connector + JSON.stringify(mapping);
+  }
+
+  return key;
+}
+
+export default function getCachedOnchangeFunction(page, val, mapping, disallow = ok, originOnchange = noop) {
+  let key = generateCacheKey(page, val, mapping);
+
+  let cache = onChangeCache.get(key);
+  if (cache) {
+    // disallow or originOnchange may update, but cache reference won't change.
+    cache.fns = { disallow, originOnchange };
   } else {
-    return function onChange(e) {
-      onchangeNoMapping(e, page, val, disallow, originOnchange);
-    }
+    cache = (e) => onchange(cache, e, page, val, mapping);
+    cache.fns = { disallow, originOnchange };
+    onChangeCache.set(key, cache);
   }
-}
 
-export default function getCachedOnchangeFunction(page, val, mapping, disallow, originOnchange) {
-  if (disallow || originOnchange) {
-    return getOnchangeFunction(page, val, disallow, mapping, originOnchange);
-  }
-  let cacheKey = [page, val].map(x => x.toString()).join(connector);
-  if (mapping) {
-    cacheKey += connector + JSON.stringify(mapping);
-  }
-  if (!onChangeCache.has(cacheKey)) {
-    onChangeCache.set(cacheKey, getOnchangeFunction(page, val, returnOk, mapping));
-  }
-  return onChangeCache.get(cacheKey);
-}
-
-export function getLoadDataOnClick(page, {
-  fn, arg = [], loadings,
-}) {
-  return function loadDataOnClick() {
-    const store = getStore();
-    if (loadings) {
-      store.dispatch({
-        type: toggleLoading,
-        page: page,
-        loadings,
-      });
-    }
-    // @TODO when & where to handle error
-    fn(...arg).then(data => {
-      if (typeof data === 'object' && !Array.isArray(data)) {
-        store.dispatch({
-          type: loadDataDone,
-          page: page,
-          data,
-          loadings: loadings || [],
-        });
-      } else {
-        store.dispatch({
-          type: loadDataDone,
-          page: page,
-          data: {
-            data,
-          },
-          loadings: loadings || [],
-        });
-      }
-    });
-  }
+  return cache;
 }
