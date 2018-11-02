@@ -53,7 +53,7 @@ export default function getCachedOnchangeFunction(page, val, mapping, disallow =
 
   let cache = onChangeCache.get(key);
   if (cache) {
-    // disallow or originOnchange maybe updated, but cache reference didn't changed.
+    // disallow or originOnchange may update, but cache reference won't change.
     cache.fns = { disallow, originOnchange };
   } else {
     cache = (e) => onchange(cache, e, page, val, mapping);
