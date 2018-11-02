@@ -1,6 +1,6 @@
 import produce from 'immer';
 import { sendError } from 'sheinq';
-import theAction from './actions';
+import theAction, { editInSaga } from './actions';
 import {
   setValKeyPath,
 } from './util/obj_key_path_ops';
@@ -10,6 +10,19 @@ function builtinReducer(state, action, page) {
   switch (action.type) {
     case theAction:
       return setValKeyPath(state, action.key.split('.'), action.value);
+    case editInSaga:
+      return produce(state, draft => {
+        try {
+          return action.fn(draft, action);
+        } catch (e) {
+          if (process.env.NODE_ENV !== 'production') {
+            throw e;
+          }
+          console.error('It"s called by rrc-loader-helper:' + e);
+          sendError(e);
+          return state;
+        }
+      });
     default:
       return null;
   }
@@ -17,6 +30,10 @@ function builtinReducer(state, action, page) {
 
 export default function decorateFn(fn, page) {
   if (typeof fn !== 'function' && typeof fn === 'object') {
+    if (Object.hasOwnProperty.call(fn, '.__inner__')) {
+      fn = fn['.__inner__'].mapping;
+    }
+
     if (!(fn.defaultState)) {
       if (process.env.NODE_ENV !== 'production') {
         const err = new Error('required property defaultState in reducer \n' +
@@ -32,6 +49,8 @@ export default function decorateFn(fn, page) {
      * 对象内 defaultState 为必须属性
      */
     return function (state = fn.defaultState, action) {
+      const builtinState = builtinReducer(state, action, page);
+      if (builtinState) return builtinState;
       if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
         return produce(state, draft => {
           try {
@@ -46,8 +65,6 @@ export default function decorateFn(fn, page) {
           }
         })
       }
-      const builtinState = builtinReducer(state, action, page);
-      if (builtinState) return builtinState;
       return state;
     }
   }
