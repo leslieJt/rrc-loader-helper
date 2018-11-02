@@ -78,6 +78,11 @@ export default function genSagas(obj, page, ctx) {
               val = yield value;
               pushRunningStack(currentFrame);
             }
+            if (markings.length) {
+              yield newPutFn(state => {
+                markings.forEach(mark => state[mark] = 1);
+              }, 'change some flags to done');
+            }
           } catch (e) {
             if (markings.length) {
               yield newPutFn(state => {
@@ -86,14 +91,8 @@ export default function genSagas(obj, page, ctx) {
             }
             throw e;
           } finally {
-            if (markings.length) {
-              yield newPutFn(state => {
-                markings.forEach(mark => state[mark] = 1);
-              }, 'change some flags to done');
-            }
             popRunningStack();
           }
-
         });
       }
     });
