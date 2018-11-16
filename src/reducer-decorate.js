@@ -11,7 +11,7 @@ function builtinReducer(state, action, page) {
     case theAction:
       return setValKeyPath(state, action.key.split('.'), action.value);
     case editInSaga:
-      return produce(state, draft => {
+      return produce(state, (draft) => {
         try {
           return action.fn(draft, action);
         } catch (e) {
@@ -36,10 +36,9 @@ export default function decorateFn(fn, page) {
 
     if (!(fn.defaultState)) {
       if (process.env.NODE_ENV !== 'production') {
-        const err = new Error('required property defaultState in reducer \n' +
-          ' reducer 对象缺少 defaultState 属性\n' +
-          `位置位于${page}所属的reducer`);
-        throw err;
+        throw new Error('required property defaultState in reducer \n'
+          + ' reducer 对象缺少 defaultState 属性\n'
+          + `位置位于${page}所属的reducer`);
       } else {
         fn.defaultState = {};
       }
@@ -48,11 +47,11 @@ export default function decorateFn(fn, page) {
      * reducer 为对象的时候包装为immer处理方式
      * 对象内 defaultState 为必须属性
      */
-    return function (state = fn.defaultState, action) {
+    return (state = fn.defaultState, action) => {
       const builtinState = builtinReducer(state, action, page);
       if (builtinState) return builtinState;
-      if (fn.hasOwnProperty(action.type) && typeof fn[action.type] === 'function') {
-        return produce(state, draft => {
+      if (Object.hasOwnProperty.call(fn, action.type) && typeof fn[action.type] === 'function') {
+        return produce(state, (draft) => {
           try {
             return fn[action.type](draft, action);
           } catch (e) {
@@ -63,12 +62,12 @@ export default function decorateFn(fn, page) {
             sendError(e);
             return state;
           }
-        })
+        });
       }
       return state;
-    }
+    };
   }
-  return function (state, action) {
+  return (state, action) => {
     const builtinState = builtinReducer(state, action, page);
     if (builtinState) return builtinState;
     try {
@@ -81,5 +80,5 @@ export default function decorateFn(fn, page) {
       sendError(e);
       return state;
     }
-  }
+  };
 }
