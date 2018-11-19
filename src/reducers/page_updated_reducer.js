@@ -6,7 +6,7 @@ const r = '.retained';
 let prevMatch = null;
 
 const isEmptyObj = obj => Object.keys(obj).length === 0;
-const isNeedRetain = m => !isEmptyObj(m.params);
+const isNeedRetain = (multi, routes) => !isEmptyObj(multi.params) || routes;
 const genKey = url => url.substring(1);
 const hasOwn = Object.prototype.hasOwnProperty;
 
@@ -21,6 +21,8 @@ const matchRetained = ({ url }, state) => {
 
 const backupPrevState = (state) => {
   const { match: { params, path, url }, page } = prevMatch;
+
+  if (!isNeedRetain(prevMatch.match, prevMatch.routes)) return state;
 
   // siteGuideModel/edit/2066
   const key = genKey(url);
@@ -38,7 +40,7 @@ const restoreNextState = (state, action) => {
   return produce(state, (draft) => {
     if (retainedData) {
       draft[action.payload.page] = retainedData.data;
-    } else if (isNeedRetain(action.payload.match)) {
+    } else if (isNeedRetain(action.payload.match, action.payload.routes)) {
       draft[action.payload.page] = undefined;
     }
   });
@@ -53,7 +55,11 @@ const retainStateReducer = (state, action) => {
   //   path: "/sizeGuideModel/edit/:id"
   //   url: "/sizeGuideModel/edit/2066"
 
-  const match = { match: action.payload.match, page: action.payload.page };
+  const match = {
+    match: action.payload.match,
+    page: action.payload.page,
+    routes: action.payload.routes
+  };
   if (!prevMatch) {
     prevMatch = match;
     return state;

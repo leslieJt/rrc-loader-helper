@@ -43,12 +43,12 @@ class Pager extends Component {
     }
     loader.then((view) => {
       const store = getStore();
-      const { location, match, args: { retain } } = props;
+      const { location, match, args: { retain, routes } } = props;
       // Component loaded, then dispatch.
       store.dispatch({
         type: updatePage,
         payload: {
-          page, location, match, retain
+          page, location, match, retain, routes
         }
       });
 
