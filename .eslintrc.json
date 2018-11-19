@@ -4,8 +4,10 @@
     "comma-dangle": "off",
     "prefer-template": "off",
     "react/jsx-filename-extension": "off",
+    "react/destructuring-assignment": "off",
     "no-console": "off",
     "import/no-unresolved": "off",
-    "no-param-reassign": "off"
+    "no-param-reassign": "off",
+    "import/prefer-default-export": "off"
   }
 }

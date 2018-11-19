@@ -8,6 +8,7 @@ import { set as setPage } from './current-page';
 import { getStore } from './inj-dispatch';
 import { updatePage } from './actions';
 import { registerReducer, pageUpdatedReducer } from './reducers';
+import asyncPageCallback from './page-loader/async';
 
 const historyList = [];
 let firstScreen = true;
@@ -25,8 +26,10 @@ class Pager extends Component {
   constructor(props) {
     super(props);
 
-    // eslint-disable-next-line prefer-const
-    let { page, loader } = props;
+    let {
+      // eslint-disable-next-line prefer-const
+      page, loader, sync, reducers
+    } = props.args;
     this.useTime = Date.now();
     setLeaveStartTime(this.useTime);
     setPage(page);
@@ -36,11 +39,11 @@ class Pager extends Component {
     };
 
     if (typeof loader === 'function') {
-      loader = loader();
+      loader = sync ? loader() : loader().then(module => asyncPageCallback(module, page, reducers));
     }
     loader.then((view) => {
       const store = getStore();
-      const { location, match, retain } = props;
+      const { location, match, args: { retain } } = props;
       // Component loaded, then dispatch.
       store.dispatch({
         type: updatePage,
@@ -69,7 +72,7 @@ class Pager extends Component {
   }
 
   componentDidMount() {
-    const { page } = this.props;
+    const { page } = this.props.args;
     const { state } = this.state;
 
     if (state === STATE_LIST.RESOLVED && !this.didSend) {
@@ -96,7 +99,7 @@ class Pager extends Component {
   }
 
   componentDidUpdate() {
-    const { page } = this.props;
+    const { page } = this.props.args;
     const { state } = this.state;
 
     if (!this.didSend && state === STATE_LIST.RESOLVED) {
@@ -147,12 +150,13 @@ class Pager extends Component {
   }
 
   render() {
-    const { loading: Loading } = this.props;
+    const { loading: Loading, sense } = this.props.args;
+    const { args, ...props } = this.props; // filter props for userLand
     const { Result, errorMsg, state } = this.state;
 
     switch (state) {
       case STATE_LIST.RESOLVED:
-        return <Result {...this.props} />;
+        return <Result {...props} $sense={sense} />;
       case STATE_LIST.ERROR:
         return <div>{errorMsg}</div>;
       default:
@@ -162,7 +166,7 @@ class Pager extends Component {
 }
 
 function Loadable(args) {
-  const wrapPager = props => <Pager {...props} {...args} />;
+  const wrapPager = props => <Pager {...props} args={args} />;
 
   wrapPager.displayName = `Loadable(${args.page})`;
 
