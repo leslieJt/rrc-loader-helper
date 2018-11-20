@@ -16,7 +16,7 @@ export default function adaptToMobx(obj, page) {
   }));
   // @TODO can i use store?
   if (saga) {
-    getStore(function (store) {
+    getStore((store) => {
       store.dispatch({
         type: updateSaga,
         saga,
